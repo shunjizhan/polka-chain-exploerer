@@ -4,32 +4,53 @@ import { AnyJson } from '@polkadot/types/types';
 import { TableData } from '../components/EventTable';
 import { typesBundle, typesChain } from '@polkadot/apps-config';
 import { Metadata } from '@polkadot/types';
+import { TypeRegistry } from '@polkadot/types/create';
+import { StatusContext } from '@polkadot/react-components/Status';
+import ApiSigner from '@polkadot/react-signer/ApiSigner';
+
+// const registry = new TypeRegistry();
+// const { queuePayload, queueSetTxStatus } = useContext(StatusContext);
 
 export const createRpc = async (rpc: string): Promise<ApiPromise> => {
   console.log(`connecting to ${rpc}...`);
 
   const wsProvider = new WsProvider(rpc);
-  let api;
-  try {
-    // api = await ApiPromise.create({
-    //   provider: wsProvider,
-    //   typesBundle,
-    //   typesChain,
-    // });
 
-    api = await ApiPromise.create({
-      provider: wsProvider,
-    });
-  } catch {
-    throw new Error(`connection to ${rpc} failed!`);
+  // const signer = new ApiSigner(registry, queuePayload, queueSetTxStatus);
+  const api = await ApiPromise.create({
+    provider: wsProvider,
+  });
+
+  // const api = new ApiPromise({
+  //   provider: wsProvider,
+  //   // signer,
+  //   // registry,
+  //   typesBundle,
+  //   typesChain,
+  // });
+
+  let err = null;
+
+  api.on('error', (error: Error) => {
+    err = `connection to ${rpc} failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`;
+  });
+
+  if (err) {
+    throw new Error(err);
   }
 
+  await api.isReady;
+    
   console.log('connected!!');
 
   return api;
 };
 
-export const getQueryFn = (api: ApiPromise, prefix: string, name: string): any => api.query[prefix][name];
+export const getQueryFn = (api: ApiPromise, query: string): any => {
+  const [prefix, name] = query.split('.');
+
+  return api.query[prefix.toLocaleLowerCase()][name.toLocaleLowerCase()];
+}
 
 const sortByName = (a, b): number => a.name.localeCompare(b.name);
 export const getModules = (api: ApiPromise): AnyJson => {

@@ -2,6 +2,7 @@ import React, { FC, ReactElement, useState, SetStateAction, ChangeEvent } from '
 import { Input, Button, Form, Menu, Dropdown } from 'antd';
 import { SyncOutlined, WifiOutlined, DisconnectOutlined, DownOutlined } from '@ant-design/icons';
 import { AnyJson } from '@polkadot/types/types';
+import { FetchData } from './Scanner';
 
 const { SubMenu } = Menu;
 
@@ -10,11 +11,15 @@ const ERROR = 'error';
 export const DEFAULT_RPC = 'wss://rpc.polkadot.io';
 // const DEFAULT_RPC = 'wss://polkadot.api.onfinality.io/public-ws';
 // const DEFAULT_RPC = 'wss://kusama-rpc.dwellir.com';
+// const DEFAULT_RPC = 'wss://karura.polkawallet.io';
 interface InputsProps {
   updateApi: any,
   isSwitchingRpc: boolean,
   isLoading: boolean,
   modules: AnyJson,
+  fetchData: FetchData,
+  rpcErr: string | null,
+  fetchErr: string | null,
 }
 
 type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
@@ -39,15 +44,31 @@ const getQueryDetails = (item: AnyJson): string => {
     : `${name}(): ${suffix}`;
 };
 
+const getArgsLength = (item: AnyJson): number => {
+  const { type: { map, doubleMap } } = item;
+  if (doubleMap) {
+    return 2;
+  } else if (map) {
+    return 1
+  } else {
+    return 0;
+  }
+};
+
 const Inputs: FC<InputsProps> = ({
   updateApi,
   isSwitchingRpc,
   isLoading,
   modules,
+  fetchData,
+  rpcErr,
+  fetchErr,
 }) => {
   const [query, setQuery] = useState<string | null>(null);
+  const [argsLength, setArgsLength] = useState<number>(0);
+  const [arg1, setArg1] = useState<string>('');
+  const [arg2, setArg2] = useState<string>('');
   const [rpcInput, setRpcInput] = useState<string>(DEFAULT_RPC);
-  const [err, setErr] = useState<string | null>(null);
 
   const handleRpcInput: eventHandler = (e) => {
     setRpcInput(e.target.value);
@@ -58,8 +79,10 @@ const Inputs: FC<InputsProps> = ({
   };
 
   const handleQuerySelect = ({ key }) => {
-    console.log(key);
-    setQuery(key);
+    const [queryName, argsLenght] = key.split('---');
+    console.log(argsLenght);
+    setQuery(queryName);
+    setArgsLength(parseInt(argsLenght, 10));
   };
 
   const menu: ReactElement = (
@@ -68,18 +91,21 @@ const Inputs: FC<InputsProps> = ({
         modules!.map(({ name, storage }) => {
           if (!storage) return null;
 
-          const { prefix, items } = storage;
+          const { items } = storage;
 
           return (
             <SubMenu title={ name } key={ name }>
               {
-                items.map(item =>
-                  <Menu.Item
-                    key={ `${name}.${item.name}` }
-                  >
-                    { `${getQueryDetails(item)}` }
-                  </Menu.Item>
-                )
+                items.map(item => {
+                  const queryDetails: string = getQueryDetails(item);
+                  return (
+                    <Menu.Item
+                      key={ `${name}.${item.name}---${getArgsLength(item)}` }
+                    >
+                      { `${queryDetails}` }
+                    </Menu.Item>                  
+                  )
+                })
               } 
             </SubMenu>
           )
@@ -90,14 +116,14 @@ const Inputs: FC<InputsProps> = ({
 
   const getRPCIcon = (): ReactElement => {
     if (isSwitchingRpc) return <SyncOutlined spin />;
-    if (err) return <DisconnectOutlined />;
+    if (rpcErr) return <DisconnectOutlined />;
     return <WifiOutlined />;
   };
 
   const rpcInputElement: ReactElement = (
     <Form.Item
-      validateStatus={ err ? ERROR : SUCCESS }
-      help={ err }
+      validateStatus={ rpcErr ? ERROR : SUCCESS }
+      help={ rpcErr }
     >
       <Input
         addonBefore={ (
@@ -115,6 +141,14 @@ const Inputs: FC<InputsProps> = ({
     </Form.Item>
   );
 
+  const handleFetch = () => {
+    fetchData(query as string, arg1, arg2, argsLength);
+  };
+
+  const handleArg1Change = e => setArg1(e.target.value);
+  const handleArg2Change = e => setArg2(e.target.value);
+
+  const disableInputs = isLoading || isSwitchingRpc;
   return (
     <section id='input-container'>
       <Form>
@@ -123,19 +157,33 @@ const Inputs: FC<InputsProps> = ({
 
       <Button
         type='primary'
-        id='input-container__button'
+        id='rpc-button'
         onClick={ handleRPChange }
-        loading={ isLoading }
-        disabled={ isLoading }
+        disabled={ disableInputs }
       >
         Switch RPC
       </Button>
 
-      <Dropdown overlay={ menu }>
+      <Dropdown overlay={ menu } disabled={ disableInputs }>
         <Button>
           { query || 'Select State Query' } <DownOutlined />
         </Button>
       </Dropdown>
+
+      { argsLength > 0 && <Input value={ arg1 } onChange={ handleArg1Change } />}
+      { argsLength > 1 && <Input value={ arg2 } onChange={ handleArg2Change } />}
+      { query && 
+        <Button
+          type='primary'
+          id='fetch-button'
+          onClick={ handleFetch }
+          loading={ isLoading }
+          disabled={ disableInputs }
+        >
+          Fetch State Data
+        </Button>
+      }
+      { fetchErr && <div>{ fetchErr }</div>}
     </section>
   );
 };

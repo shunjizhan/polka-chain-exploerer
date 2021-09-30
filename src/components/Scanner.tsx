@@ -17,6 +17,7 @@ import Loading from './Loading';
 import {
   createRpc,
   getModules,
+  getQueryFn,
 } from '../utils/chainUtils';
 
 import '../styles.scss';
@@ -27,9 +28,11 @@ interface ApiRef {
   rpc: string,
 }
 
+export type FetchData = (query: string, arg1: string | null, arg2: string | null, argsLength: number) => void;
+
 const Scanner: FC = () => {
-  const [events, setEvents] = useState<TableData[]>([]);
-  const [err, setErr] = useState<string | null>(null);
+  const [rpcErr, setRpcErr] = useState<string | null>(null);
+  const [fetchErr, setFetchErr] = useState<string | null>(null);
   const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC });
 
   /* ---------- flags ---------- */
@@ -48,30 +51,41 @@ const Scanner: FC = () => {
 
   const updateApi = async (rpc: string) => {
     if (rpc === curApi.current.rpc) return;
-    console.log('!!!!', rpc, curApi.current.rpc)
+    // console.log('!!!!', rpc, curApi.current.rpc)
 
     setIsSwitchingRpc(true);
     try {
       const api = await createRpc(rpc);
       curApi.current = { api, rpc };
-      setErr(null);
+      setRpcErr(null);
     } catch (e) {
-      setErr(`failed to connect to new RPC: rpc`);
+      console.log('!!!!!!!!!!!!')
+      setRpcErr(`failed to connect to new RPC: rpc`);
     } finally {
       setIsSwitchingRpc(false);
     }
   };
 
-  const resetStatus = () => {
-    setEvents([]);
+  const fetchData: FetchData = async (query, arg1, arg2, argsLength) => {
     setIsLoading(true);
-  };
+    setFetchErr(null);
 
-  const fetchData = async () => {
-    resetStatus();
-    await updateApi('xxx');
+    const queryFn: any = getQueryFn(curApi.current.api as ApiPromise, query);
+    
+    console.log(query, arg1, arg2);
+    let args = [];
+    if (argsLength === 1) args = [arg1];
+    if (argsLength === 2) args = [arg2];
 
-    const _fetch = async (block: number) => {}
+    let res;
+    try {
+      res = await queryFn.apply(null, args)
+      console.log(res);
+    } catch (e) {
+      setFetchErr(e.toString());
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,6 +99,9 @@ const Scanner: FC = () => {
             isSwitchingRpc={ isSwitchingRpc }
             isLoading={ isLoading }
             modules={ getModules(curApi.current.api!) }
+            fetchData={ fetchData }
+            fetchErr={ fetchErr }
+            rpcErr={ rpcErr }
           />
 
           {/* <div id='toolBox'>
@@ -93,14 +110,6 @@ const Scanner: FC = () => {
               all={ 100 }
             />
           </div> */}
-          
-          
-
-          { !!events.length && (
-            <div id='table-container'>
-              <EventTable dataSource={ events } />
-            </div>
-          )}
         </>
       )}
     </div>
