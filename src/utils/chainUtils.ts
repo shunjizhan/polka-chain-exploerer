@@ -1,5 +1,6 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SignedBlock } from '@polkadot/types/interfaces';
+import { AnyJson } from '@polkadot/types/types';
 import { TableData } from '../components/EventTable';
 
 export const createRpc = async (rpc: string): Promise<ApiPromise> => {
@@ -15,8 +16,12 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
 
   console.log('connected!!');
 
+  console.log(getMetadata(api))
+
   return api;
 };
+
+const getMetadata = (api: ApiPromise): AnyJson => api.runtimeMetadata.toJSON().metadata;
 
 export const getSignedBlock = async (api: ApiPromise, blockNumber: number): Promise<SignedBlock> => {
   const blockHash = await api.rpc.chain.getBlockHash(blockNumber);

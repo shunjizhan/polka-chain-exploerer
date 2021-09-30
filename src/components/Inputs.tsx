@@ -1,80 +1,46 @@
-import React, { FC, ReactElement, useState } from 'react';
+import React, { FC, ReactElement, useState, SetStateAction, ChangeEvent } from 'react';
 import { Input, Button, Form } from 'antd';
 import { SyncOutlined, WifiOutlined, DisconnectOutlined } from '@ant-design/icons';
-import { ApiPromise } from '@polkadot/api';
-
-import { Err, NO_ERR, eventHandler } from './Scanner';
-import { getLastBlock } from '../utils/chainUtils';
 
 const SUCCESS = 'success';
 const ERROR = 'error';
+export const DEFAULT_RPC = 'wss://rpc.polkadot.io';
+// const DEFAULT_RPC = 'wss://polkadot.api.onfinality.io/public-ws';
+// const DEFAULT_RPC = 'wss://kusama-rpc.dwellir.com';
 interface InputsProps {
-  rpc: string,
-  startBlock: number,
-  endBlock: number,
-  err: Err,
-  setErr: React.Dispatch<React.SetStateAction<Err>>,
-  api: ApiPromise,
-
+  updateApi: any,
   isSwitchingRpc: boolean,
   isLoading: boolean,
-
-  fetchData: () => void,
-  handleRpcChange: eventHandler,
-  handleStartBlockChange: eventHandler,
-  handleEndBlockChange: eventHandler,
 }
 
-const Inputs: FC<InputsProps> = ({
-  rpc,
-  startBlock,
-  endBlock,
-  err,
-  setErr,
-  api,
+type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
 
+const Inputs: FC<InputsProps> = ({
+  updateApi,
   isSwitchingRpc,
   isLoading,
-
-  fetchData,
-  handleRpcChange,
-  handleStartBlockChange,
-  handleEndBlockChange,
 }) => {
-  const [isValidating, setIsValidating] = useState<boolean>(false);
+  const [rpcInput, setRpcInput] = useState<string>(DEFAULT_RPC);
+  const [err, setErr] = useState<string | null>(null);
 
-  const validateFields = async () => {
-    if (startBlock < 0) {
-      setErr({ ...NO_ERR, start: 'start block must be greater than 0!' }); return false;
-    }
-    if (startBlock >= endBlock) {
-      setErr({ ...NO_ERR, start: 'start block must be greater than end block!' }); return false;
-    }
-    if (endBlock < 0) {
-      setErr({ ...NO_ERR, end: 'end block must be greater than 0!' }); return false;
-    }
-    if (endBlock - startBlock > 2000) {
-      setErr({ ...NO_ERR, end: 'max interval is 2000!' }); return false;
-    }
+  const handleRpcInput: eventHandler = (e) => {
+    setRpcInput(e.target.value);
+  };
 
-    const lastBlock = await getLastBlock(api);
-    if (endBlock > lastBlock) {
-      setErr({ ...NO_ERR, end: `end block must be less than last block ${lastBlock}!` }); return false;
-    }
-
-    return true;
+  const handleRPChange = (): void => {
+    updateApi(rpcInput);
   };
 
   const getRPCIcon = (): ReactElement => {
     if (isSwitchingRpc) return <SyncOutlined spin />;
-    if (err.rpc) return <DisconnectOutlined />;
+    if (err) return <DisconnectOutlined />;
     return <WifiOutlined />;
   };
 
-  const rpcInput: ReactElement = (
+  const rpcInputElement: ReactElement = (
     <Form.Item
-      validateStatus={ err.rpc ? ERROR : SUCCESS }
-      help={ err.rpc }
+      validateStatus={ err ? ERROR : SUCCESS }
+      help={ err }
     >
       <Input
         addonBefore={ (
@@ -84,78 +50,28 @@ const Inputs: FC<InputsProps> = ({
           </div>
         ) }
         className='input-container__field'
-        value={ rpc }
-        onChange={ handleRpcChange }
+        value={ rpcInput }
+        onChange={ handleRpcInput }
         disabled={ isLoading }
         style={{ textAlign: 'center' }}
       />
     </Form.Item>
   );
-
-  const startBlockInput: ReactElement = (
-    <Form.Item
-      validateStatus={ err.start ? ERROR : SUCCESS }
-      help={ err.start }
-    >
-      <Input
-        addonBefore={ (
-          <div style={{ width: '100px' }}>
-            Start Block
-          </div>
-        ) }
-        className='input-container__field'
-        value={ startBlock }
-        onChange={ handleStartBlockChange }
-        disabled={ isLoading }
-        style={{ textAlign: 'center' }}
-      />
-    </Form.Item>
-  );
-
-  const endBlockInput: ReactElement = (
-    <Form.Item
-      validateStatus={ err.end ? ERROR : SUCCESS }
-      help={ err.end }
-    >
-      <Input
-        addonBefore={ (
-          <div style={{ width: '100px' }}>
-            {isValidating ? <SyncOutlined spin /> : 'End block'}
-          </div>
-        ) }
-        className='input-container__field'
-        value={ endBlock }
-        onChange={ handleEndBlockChange }
-        disabled={ isLoading }
-        style={{ textAlign: 'center' }}
-      />
-    </Form.Item>
-  );
-
-  const handleClick = async () => {
-    setIsValidating(true);
-    const isFieldsValid = await validateFields();
-    setIsValidating(false);
-
-    if (isFieldsValid) fetchData();
-  };
 
   return (
     <section id='input-container'>
       <Form>
-        { rpcInput }
-        { startBlockInput }
-        { endBlockInput }
+        { rpcInputElement }
       </Form>
 
       <Button
         type='primary'
         id='input-container__button'
-        onClick={ handleClick }
+        onClick={ handleRPChange }
         loading={ isLoading }
         disabled={ isLoading }
       >
-        scan
+        Switch RPC
       </Button>
     </section>
   );
