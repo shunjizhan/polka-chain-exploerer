@@ -19,6 +19,26 @@ interface InputsProps {
 
 type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
 
+const getQueryDetails = (item: AnyJson): string => {
+  let suffix;
+  let params;
+  const { type, name } = item;
+  const { map, doubleMap, plain } = type;
+  if (map) {
+    suffix = `${ map.value }`
+    params = map.key;
+  } if (doubleMap) {
+    suffix = `${doubleMap.value}`
+    params = `${doubleMap.key1}, ${doubleMap.key2}`;
+  } else if (plain) {
+    suffix = `${ plain }`
+  }
+
+  return params
+    ? `${name}(${params}): ${suffix}`
+    : `${name}(): ${suffix}`;
+};
+
 const Inputs: FC<InputsProps> = ({
   updateApi,
   isSwitchingRpc,
@@ -53,11 +73,11 @@ const Inputs: FC<InputsProps> = ({
           return (
             <SubMenu title={ name } key={ name }>
               {
-                items.map(i =>
+                items.map(item =>
                   <Menu.Item
-                    key={ `${name}.${i.name}` }
+                    key={ `${name}.${item.name}` }
                   >
-                    { i.name }
+                    { `${getQueryDetails(item)}` }
                   </Menu.Item>
                 )
               } 

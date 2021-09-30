@@ -31,7 +31,21 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
 
 export const getQueryFn = (api: ApiPromise, prefix: string, name: string): any => api.query[prefix][name];
 
-export const getModules = (api: ApiPromise): AnyJson => api.runtimeMetadata.toJSON().metadata!.v13!.modules;  // TODO: v13
+const sortByName = (a, b): number => a.name.localeCompare(b.name);
+export const getModules = (api: ApiPromise): AnyJson => {
+  const { modules } = api.runtimeMetadata.toJSON().metadata!.v13;   // TODO: v13?
+  console.log(modules);
+
+  const sortedModules = modules.map(m => {
+    if (m.storage) {
+      m.storage.items = m.storage.items.sort(sortByName);
+    }
+
+    return m;
+  });
+
+  return sortedModules.sort(sortByName);;
+};  
 
 
 
