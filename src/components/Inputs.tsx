@@ -1,6 +1,9 @@
 import React, { FC, ReactElement, useState, SetStateAction, ChangeEvent } from 'react';
-import { Input, Button, Form } from 'antd';
-import { SyncOutlined, WifiOutlined, DisconnectOutlined } from '@ant-design/icons';
+import { Input, Button, Form, Menu, Dropdown } from 'antd';
+import { SyncOutlined, WifiOutlined, DisconnectOutlined, DownOutlined } from '@ant-design/icons';
+import { AnyJson } from '@polkadot/types/types';
+
+const { SubMenu } = Menu;
 
 const SUCCESS = 'success';
 const ERROR = 'error';
@@ -11,6 +14,7 @@ interface InputsProps {
   updateApi: any,
   isSwitchingRpc: boolean,
   isLoading: boolean,
+  modules: AnyJson,
 }
 
 type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
@@ -19,7 +23,9 @@ const Inputs: FC<InputsProps> = ({
   updateApi,
   isSwitchingRpc,
   isLoading,
+  modules,
 }) => {
+  const [query, setQuery] = useState<string | null>(null);
   const [rpcInput, setRpcInput] = useState<string>(DEFAULT_RPC);
   const [err, setErr] = useState<string | null>(null);
 
@@ -27,9 +33,40 @@ const Inputs: FC<InputsProps> = ({
     setRpcInput(e.target.value);
   };
 
-  const handleRPChange = (): void => {
+  const handleRPChange = () => {
     updateApi(rpcInput);
   };
+
+  const handleQuerySelect = ({ key }) => {
+    console.log(key);
+    setQuery(key);
+  };
+
+  const menu: ReactElement = (
+    <Menu onClick={ handleQuerySelect }>
+      {
+        modules!.map(({ name, storage }) => {
+          if (!storage) return null;
+
+          const { prefix, items } = storage;
+
+          return (
+            <SubMenu title={ name } key={ name }>
+              {
+                items.map(i =>
+                  <Menu.Item
+                    key={ `${name}.${i.name}` }
+                  >
+                    { i.name }
+                  </Menu.Item>
+                )
+              } 
+            </SubMenu>
+          )
+        })
+      }
+    </Menu>
+  );
 
   const getRPCIcon = (): ReactElement => {
     if (isSwitchingRpc) return <SyncOutlined spin />;
@@ -73,6 +110,12 @@ const Inputs: FC<InputsProps> = ({
       >
         Switch RPC
       </Button>
+
+      <Dropdown overlay={ menu }>
+        <Button>
+          { query || 'Select State Query' } <DownOutlined />
+        </Button>
+      </Dropdown>
     </section>
   );
 };

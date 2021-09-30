@@ -16,7 +16,7 @@ import Loading from './Loading';
 
 import {
   createRpc,
-  getEventsForBlock,
+  getModules,
 } from '../utils/chainUtils';
 
 import '../styles.scss';
@@ -84,14 +84,17 @@ const Scanner: FC = () => {
             updateApi={ updateApi }
             isSwitchingRpc={ isSwitchingRpc }
             isLoading={ isLoading }
+            modules={ getModules(curApi.current.api!) }
           />
 
-          <div id='toolBox'>
+          {/* <div id='toolBox'>
             <Progress
               cur={ 100 }
               all={ 100 }
             />
-          </div>
+          </div> */}
+          
+          
 
           { !!events.length && (
             <div id='table-container'>

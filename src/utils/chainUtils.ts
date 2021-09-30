@@ -2,6 +2,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SignedBlock } from '@polkadot/types/interfaces';
 import { AnyJson } from '@polkadot/types/types';
 import { TableData } from '../components/EventTable';
+import { typesBundle, typesChain } from '@polkadot/apps-config';
+import { Metadata } from '@polkadot/types';
 
 export const createRpc = async (rpc: string): Promise<ApiPromise> => {
   console.log(`connecting to ${rpc}...`);
@@ -9,19 +11,34 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
   const wsProvider = new WsProvider(rpc);
   let api;
   try {
-    api = await ApiPromise.create({ provider: wsProvider });
+    // api = await ApiPromise.create({
+    //   provider: wsProvider,
+    //   typesBundle,
+    //   typesChain,
+    // });
+
+    api = await ApiPromise.create({
+      provider: wsProvider,
+    });
   } catch {
     throw new Error(`connection to ${rpc} failed!`);
   }
 
   console.log('connected!!');
 
-  console.log(getMetadata(api))
-
   return api;
 };
 
-const getMetadata = (api: ApiPromise): AnyJson => api.runtimeMetadata.toJSON().metadata;
+export const getQueryFn = (api: ApiPromise, prefix: string, name: string): any => api.query[prefix][name];
+
+export const getModules = (api: ApiPromise): AnyJson => api.runtimeMetadata.toJSON().metadata!.v13!.modules;  // TODO: v13
+
+
+
+
+
+
+
 
 export const getSignedBlock = async (api: ApiPromise, blockNumber: number): Promise<SignedBlock> => {
   const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
