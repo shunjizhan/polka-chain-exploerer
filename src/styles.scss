@@ -1,0 +1,91 @@
+$input-width: 368px;
+
+$orange: orange;
+$polkaPurple: rgb(230, 0, 122);
+
+#Scanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+#input-container {
+  display: flex;
+  flex-direction: column;
+  width: $input-width;
+}
+
+#input-container__button {
+  border-radius: 2px;
+  margin-top: 10px;
+  background-color: rgba($polkaPurple, 0.95);
+  border: none;
+
+  &:hover {
+    background-color: rgba($polkaPurple, 0.75);
+    border: none;
+  }
+}
+
+#loading-overlay__text {
+  font-size: 300%;
+  margin: 100px 0 50px 0;
+}
+
+#table-container {
+  width: 80%;
+}
+
+#data-table {
+  width: 100%;
+}
+
+#progress {
+  min-width: 588px;
+}
+
+#progress-count {
+  display: flex;
+  margin: 5px 0;
+  svg {
+    height: 100%;
+  }
+}
+
+#toolBox {
+  display: flex;
+  margin-bottom: 10px;
+  width: 80%;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+#filter {
+  border: 1px solid yellow;
+  margin-left: 50px;
+}
+
+#loadingText {
+  padding-left: 10px;
+  color: $polkaPurple;
+}
+
+.ant-row {
+  margin-bottom: 5px !important;
+}
+
+.anticon-wifi {
+  color: #00e66c !important;
+}
+
+.anticon-sync,
+.anticon-disconnect,
+.anticon-wifi {
+  margin-right: 6px;
+}
+
+/* github badge */
+@at-root.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}
