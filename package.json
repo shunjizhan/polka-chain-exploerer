@@ -1,10 +1,10 @@
 {
-  "name": "polkadot-scanner",
+  "name": "polka-chain-explorer",
   "version": "1.0.0",
-  "description": "basic polkadot scanner",
-  "main": "dist/polkadot-scanner.bundle.js",
+  "description": "polkadot chain explorer",
+  "main": "dist/polka-chain-explorer.bundle.js",
   "files": [
-    "dist/polkadot-scanner.bundle.js"
+    "dist/polka-chain-explorer.bundle.js"
   ],
   "author": "Shunji Zhan <shunhahaha@live.com>",
   "keywords": [],
@@ -19,12 +19,12 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "NODE_OPTIONS=\"-r esm\" NODE_ENV=development node scripts/dev-server.js",
+    "start": "NODE_ENV=development node scripts/dev-server.js",
     "serve": "serve dist/",
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "test": "jest --collect-coverage",
     "prebuild": "rm -rf dist/",
-    "build": "NODE_OPTIONS=\"-r esm\" NODE_ENV=production webpack --config webpack.config.js"
+    "build": "NODE_ENV=production webpack --config webpack.config.js"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
@@ -76,8 +76,6 @@
     "antd": "^4.16.13",
     "buffer": "^6.0.3",
     "crypto": "^1.0.1",
-    "esm": "^3.2.25",
-    "prop-types": "^15.7.2",
     "rc-progress": "^3.1.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

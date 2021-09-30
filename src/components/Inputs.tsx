@@ -1,7 +1,6 @@
 import React, { FC, ReactElement, useState, SetStateAction, ChangeEvent } from 'react';
 import { Input, Button, Form, Menu, Dropdown } from 'antd';
 import { SyncOutlined, WifiOutlined, DisconnectOutlined, DownOutlined } from '@ant-design/icons';
-import { AnyJson } from '@polkadot/types/types';
 import { FetchData } from './Scanner';
 
 const { SubMenu } = Menu;
@@ -16,7 +15,7 @@ interface InputsProps {
   updateApi: any,
   isSwitchingRpc: boolean,
   isLoading: boolean,
-  modules: AnyJson,
+  modules: any,
   fetchData: FetchData,
   rpcErr: string | null,
   fetchErr: string | null,
@@ -24,7 +23,7 @@ interface InputsProps {
 
 type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
 
-const getQueryDetails = (item: AnyJson): string => {
+const getQueryDetails = (item: any): string => {
   let suffix;
   let params;
   const { type, name } = item;
@@ -44,7 +43,7 @@ const getQueryDetails = (item: AnyJson): string => {
     : `${name}(): ${suffix}`;
 };
 
-const getArgsLength = (item: AnyJson): number => {
+const getArgsLength = (item: any): number => {
   const { type: { map, doubleMap } } = item;
   if (doubleMap) {
     return 2;

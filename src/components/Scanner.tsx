@@ -73,16 +73,16 @@ const Scanner: FC = () => {
     const queryFn: any = getQueryFn(curApi.current.api as ApiPromise, query);
     
     console.log(query, arg1, arg2);
-    let args = [];
+    let args: any[] = [];
     if (argsLength === 1) args = [arg1];
     if (argsLength === 2) args = [arg2];
 
     let res;
     try {
-      res = await queryFn.apply(null, args)
+      res = await queryFn.apply(null, args);    /* ts-disable-line */
       console.log(res);
     } catch (e) {
-      setFetchErr(e.toString());
+      setFetchErr((e as ChangeEvent<any>).toString());
     } finally {
       setIsLoading(false);
     }

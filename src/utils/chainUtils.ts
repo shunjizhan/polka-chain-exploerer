@@ -1,6 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SignedBlock } from '@polkadot/types/interfaces';
-import { AnyJson } from '@polkadot/types/types';
 import { TableData } from '../components/EventTable';
 import { typesBundle, typesChain } from '@polkadot/apps-config';
 import { Metadata } from '@polkadot/types';
@@ -29,7 +28,7 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
   //   typesChain,
   // });
 
-  let err = null;
+  let err: string | null = null;
 
   api.on('error', (error: Error) => {
     err = `connection to ${rpc} failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`;
@@ -53,8 +52,8 @@ export const getQueryFn = (api: ApiPromise, query: string): any => {
 }
 
 const sortByName = (a, b): number => a.name.localeCompare(b.name);
-export const getModules = (api: ApiPromise): AnyJson => {
-  const { modules } = api.runtimeMetadata.toJSON().metadata!.v13;   // TODO: v13?
+export const getModules = (api: ApiPromise): any => {
+  const { modules } = api.runtimeMetadata.toJSON().metadata!['v13']; 
   console.log(modules);
 
   const sortedModules = modules.map(m => {

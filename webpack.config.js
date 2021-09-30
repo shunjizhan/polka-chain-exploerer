@@ -48,7 +48,7 @@ module.exports = {
   entry: path.resolve(__dirname, './src/index.tsx'),
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'polkadot-scanner.bundle.js',
+    filename: 'polka-chain-explorer.bundle.js',
   },
   resolve: {
     // our code can resolve 'xxx' instead of writing 'xxx.jsx'
