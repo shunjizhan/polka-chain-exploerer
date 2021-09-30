@@ -10,7 +10,7 @@ const isProd = process.env.NODE_ENV === 'production';
 /* --------------- options --------------- */
 const devOptions = {
   mode: 'development',
-  devtool: 'source-map',
+  devtool: 'eval-source-map',
   watchOptions: {
     aggregateTimeout: 0, // debounce time for re-compile
     ignored: ['node_modules/**'],
@@ -25,6 +25,7 @@ const prodOptions = {
       parallel: true,
     })],
   },
+  devtool: 'source-map',
 };
 const options = isProd ? prodOptions : devOptions;
 

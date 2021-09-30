@@ -2,6 +2,11 @@ import React, { FC, ReactElement, useState, SetStateAction, ChangeEvent } from '
 import { Input, Button, Form, Menu, Dropdown } from 'antd';
 import { SyncOutlined, WifiOutlined, DisconnectOutlined, DownOutlined } from '@ant-design/icons';
 import { FetchData } from './Scanner';
+import {
+  getQueryDetails,
+  getArgsLength,
+} from '../utils/inputsUtils';
+import { getArgNames } from '../utils/inputsUtils';
 
 const { SubMenu } = Menu;
 
@@ -23,37 +28,6 @@ interface InputsProps {
 
 type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
 
-const getQueryDetails = (item: any): string => {
-  let suffix;
-  let params;
-  const { type, name } = item;
-  const { map, doubleMap, plain } = type;
-  if (map) {
-    suffix = `${ map.value }`
-    params = map.key;
-  } if (doubleMap) {
-    suffix = `${doubleMap.value}`
-    params = `${doubleMap.key1}, ${doubleMap.key2}`;
-  } else if (plain) {
-    suffix = `${ plain }`
-  }
-
-  return params
-    ? `${name}(${params}): ${suffix}`
-    : `${name}(): ${suffix}`;
-};
-
-const getArgsLength = (item: any): number => {
-  const { type: { map, doubleMap } } = item;
-  if (doubleMap) {
-    return 2;
-  } else if (map) {
-    return 1
-  } else {
-    return 0;
-  }
-};
-
 const Inputs: FC<InputsProps> = ({
   updateApi,
   isSwitchingRpc,
@@ -67,6 +41,8 @@ const Inputs: FC<InputsProps> = ({
   const [argsLength, setArgsLength] = useState<number>(0);
   const [arg1, setArg1] = useState<string>('');
   const [arg2, setArg2] = useState<string>('');
+  const [arg1Name, setArg1Name] = useState<string>('');
+  const [arg2Name, setArg2Name] = useState<string>('');
   const [rpcInput, setRpcInput] = useState<string>(DEFAULT_RPC);
 
   const handleRpcInput: eventHandler = (e) => {
@@ -77,9 +53,18 @@ const Inputs: FC<InputsProps> = ({
     updateApi(rpcInput);
   };
 
+  // when select a query from dropdown
   const handleQuerySelect = ({ key }) => {
-    const [queryName, argsLenght] = key.split('---');
-    console.log(argsLenght);
+    const [queryName, argsLenght, argNames] = key.split('---');
+    const [arg1Name, arg2Name] = argNames.split(',');
+    
+    // reset inputs
+    setArg1('');
+    setArg2('');
+
+    // set query related data
+    setArg1Name(arg1Name);
+    setArg2Name(arg2Name);
     setQuery(queryName);
     setArgsLength(parseInt(argsLenght, 10));
   };
@@ -99,7 +84,7 @@ const Inputs: FC<InputsProps> = ({
                   const queryDetails: string = getQueryDetails(item);
                   return (
                     <Menu.Item
-                      key={ `${name}.${item.name}---${getArgsLength(item)}` }
+                      key={ `${name}.${item.name}---${getArgsLength(item)}---${getArgNames(item)}` }
                     >
                       { `${queryDetails}` }
                     </Menu.Item>                  
@@ -169,8 +154,22 @@ const Inputs: FC<InputsProps> = ({
         </Button>
       </Dropdown>
 
-      { argsLength > 0 && <Input value={ arg1 } onChange={ handleArg1Change } />}
-      { argsLength > 1 && <Input value={ arg2 } onChange={ handleArg2Change } />}
+      { argsLength > 0 && 
+        <Input
+          value={ arg1 }
+          onChange={ handleArg1Change }
+          placeholder='leave empty will use default arg'
+          addonBefore={ arg1Name }
+        />
+      }
+      { argsLength > 1 && 
+        <Input
+          value={ arg2 }
+          onChange={ handleArg2Change }
+          placeholder='leave empty will use default arg'
+          addonBefore={ arg2Name }
+        />
+      }
       { query && 
         <Button
           type='primary'
