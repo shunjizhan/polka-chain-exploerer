@@ -4,7 +4,6 @@ import React, {
   useRef,
   ChangeEvent,
   FC,
-  useCallback,
 } from 'react';
 import { ApiPromise } from '@polkadot/api';
 import { AnyJson, Codec } from '@polkadot/types/types';
@@ -75,7 +74,7 @@ const Scanner: FC = () => {
     try {
       const api = await createRpc(rpc);
       curApi.current = { api, rpc };
-      setRpcErr(null);
+      resetData();
     } catch (e) {
       console.log('!!!!!!!!!!!!', e);
       setRpcErr(`failed to connect to new RPC: ${rpc}`);
