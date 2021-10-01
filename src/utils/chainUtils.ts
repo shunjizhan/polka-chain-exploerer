@@ -1,43 +1,25 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { typesBundle, typesChain } from '@polkadot/apps-config';
-import { Metadata } from '@polkadot/types';
 import { TypeRegistry } from '@polkadot/types/create';
-import { StatusContext } from '@polkadot/react-components/Status';
-import ApiSigner from '@polkadot/react-signer/ApiSigner';
 
-// const registry = new TypeRegistry();
-// const { queuePayload, queueSetTxStatus } = useContext(StatusContext);
+const registry = new TypeRegistry();
 
 export const createRpc = async (rpc: string): Promise<ApiPromise> => {
   console.log(`connecting to ${rpc}...`);
 
   const wsProvider = new WsProvider(rpc);
 
-  // const signer = new ApiSigner(registry, queuePayload, queueSetTxStatus);
-  const api = await ApiPromise.create({
-    provider: wsProvider,
-  });
-
-  // const api = new ApiPromise({
-  //   provider: wsProvider,
-  //   // signer,
-  //   // registry,
-  //   typesBundle,
-  //   typesChain,
-  // });
-
-  let err: string | null = null;
-
-  api.on('error', (error: Error) => {
-    err = `connection to ${rpc} failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`;
-  });
-
-  if (err) {
-    throw new Error(err);
+  let api: ApiPromise;
+  try {
+    api = await ApiPromise.create({
+      provider: wsProvider,
+      registry,
+      typesBundle,
+      typesChain,
+    });
+  } catch (e) {
+    throw e;
   }
-
-  await api.isReady;
-  // const res = await api.query.identity.identityOf.k
     
   console.log('connected!!');
 
