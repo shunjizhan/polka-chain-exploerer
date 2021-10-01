@@ -24,6 +24,7 @@ import '../styles.scss';
 import 'antd/dist/antd.css';
 import { AnyFunction, AnyJson, Codec } from '@polkadot/types/types';
 import DataViewer from './DataViewer';
+import { PaginationOptions } from '@polkadot/api/types';
 
 interface ApiRef {
   api: ApiPromise | null,
@@ -96,29 +97,47 @@ const Scanner: FC = () => {
       let res: AnyJson;
       if (queryFn.entriesPaged && !hasArg) {
         console.log('entriesPaged args ', args);
-        const entries: [StorageKey, Codec][] = await queryFn.entriesPaged({
-          args,
-          pageSize: 10,
-        });
 
-        res = entries.map(([key, val]) => [key.toString(), val.toHuman()]);
+        const PAGE_SIZE = 10;
+        const allEntries: [StorageKey, Codec][] = [];
+        let curIndex = -1;
+        const _fetch = async (opt: PaginationOptions): [StorageKey, Codec][] => {
+          const entries: [StorageKey, Codec][] = await queryFn.entriesPaged(opt);
+          allEntries.push(...entries);
+
+          if (entries.length === PAGE_SIZE) {
+            // curIndex += PAGE_SIZE;
+            // const lastKey = entries[0][0][curIndex];
+            // console.log(curIndex, lastKey, entries.length);
+            // await _fetch({ ...opt, startKey: lastKey.toString() });
+          }
+
+          return allEntries;
+        };
+
+        await _fetch({ args, pageSize: PAGE_SIZE })
+
+        res = allEntries.map(([key, val]) => [key.toString(), val.toHuman()]);
       } else {
         console.log('query args ', args);
         res = (await queryFn(...args)).toHuman();
       }
 
-      console.log(res);
+      console.log({ res });
       res = res !== null
         ? res instanceof Object ? res : [res]
         : ['NO DATA'];
 
-      
       setData(res);
     } catch (e) {
       setFetchErr((e as ChangeEvent<any>).toString());
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fetchNextPage = (): void => {
+    alert('this feature is WIP... please come back soon');
   };
 
   return (
@@ -148,6 +167,7 @@ const Scanner: FC = () => {
             data && (
               <DataViewer
                 src={ data as Record<string, unknown> }
+                fetchNextPage={ fetchNextPage }
               />
             )
           }
