@@ -2,17 +2,13 @@ import React, { Dispatch, FC, MouseEventHandler, SetStateAction, useState } from
 import ReactJson from 'react-json-view';
 import { Button } from 'antd';
 import { EyeInvisibleTwoTone, EyeTwoTone, ArrowRightOutlined } from '@ant-design/icons';
-interface DataViewerProps {
-  src: Record<string, unknown>,
-  fetchNextPage: () => void,
-}
-
 interface OptionButtonProps {
   handler: Dispatch<SetStateAction<boolean>>,
   enabled: boolean,
   text: string,
 }
-const OptionButton: FC<OptionButtonProps> = ({ handler, enabled, text }) => (
+
+const OptionButton: FC<OptionButtonProps> = React.memo(({ handler, enabled, text }) => (
   <Button className='data-option' onClick={ () => handler(x => !x) }>
     { text } {
       enabled
@@ -20,9 +16,16 @@ const OptionButton: FC<OptionButtonProps> = ({ handler, enabled, text }) => (
         : <EyeInvisibleTwoTone twoToneColor="red" />
       }
   </Button>
-);
+));
 
-const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage }) => {
+interface DataViewerProps {
+  src: Record<string, unknown>,
+  isLoadingNextPage: boolean,
+  hasNextPage: boolean,
+  fetchNextPage: () => void,
+}
+
+const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage, isLoadingNextPage, hasNextPage }) => {
   const [enableClipboard, setEnableClipboard] = useState<boolean>(false);
   const [displayDataTypes, setDisplayDataTypes] = useState<boolean>(false);
   const [displayObjectSize, setDisplayObjectSize] = useState<boolean>(false);
@@ -55,7 +58,14 @@ const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage }) => {
           text='array key'
         />
 
-        <Button className='data-option' onClick={ fetchNextPage } id='next-page-button' type='primary'>
+        <Button
+          type='primary'
+          id='next-page-button'
+          className='data-option'
+          onClick={ fetchNextPage }
+          loading={ isLoadingNextPage }
+          disabled={ isLoadingNextPage || !hasNextPage }
+        >
           Next Page <ArrowRightOutlined />
         </Button>
       </div>
@@ -76,4 +86,4 @@ const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage }) => {
   );
 };
 
-export default DataViewer;
+export default React.memo(DataViewer);

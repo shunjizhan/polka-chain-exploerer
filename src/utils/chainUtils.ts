@@ -9,23 +9,17 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
 
   const wsProvider = new WsProvider(rpc);
 
-  let api: ApiPromise;
-  try {
-    api = await ApiPromise.create({
-      provider: wsProvider,
-      registry,
-      typesBundle,
-      typesChain,
-    });
-  } catch (e) {
-    throw e;
-  }
-    
+  const api: ApiPromise = await ApiPromise.create({
+    provider: wsProvider,
+    registry,
+    typesBundle,
+    typesChain,
+  });
+
   console.log('connected!!');
 
   return api;
 };
-
 
 const firstCharToLower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
@@ -33,12 +27,12 @@ export const getQueryFn = (api: ApiPromise, query: string): any => {
   const [prefix, name] = query.split('.');
 
   return api.query[firstCharToLower(prefix)]?.[firstCharToLower(name)];
-}
+};
 
 const sortByName = (a, b): number => a.name.localeCompare(b.name);
 export const getModules = (api: ApiPromise): any => {
-  const { modules } = api.runtimeMetadata.toJSON().metadata!['v13']; 
-  console.log(modules);
+  const { modules } = api.runtimeMetadata.toJSON().metadata!.v13;
+  console.log('modules:', modules);
 
   const sortedModules = modules.map(m => {
     if (m.storage) {
@@ -48,5 +42,5 @@ export const getModules = (api: ApiPromise): any => {
     return m;
   });
 
-  return sortedModules.sort(sortByName);;
-};  
+  return sortedModules.sort(sortByName);
+};

@@ -61,7 +61,9 @@ module.exports = {
     'react-hooks/exhaustive-deps': 0,                                       // so useEffect can have empty deps
     'implicit-arrow-linebreak': 0,                                          // can use new line in long arrow function
     'no-nested-ternary': 0,                                                 // allow nested
-    'treact/jsx-wrap-multilines': 0                                         // multiline JSX doesn't need paranthesis
+    'treact/jsx-wrap-multilines': 0,                                        // multiline JSX doesn't need paranthesis
+    '@typescript-eslint/ban-ts-comment': 0,                                 // can ignore TS errors
+    '@typescript-eslint/no-non-null-assertion': 0,                          // allow not-null assertions 
 
     /* ---------- ts override ---------- */
     // https://stackoverflow.com/questions/63818415/react-was-used-before-it-was-defined

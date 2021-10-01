@@ -12,11 +12,11 @@ const { SubMenu } = Menu;
 
 const SUCCESS = 'success';
 const ERROR = 'error';
-// export const DEFAULT_RPC = 'wss://rpc.polkadot.io';
+export const DEFAULT_RPC = 'wss://rpc.polkadot.io';
 // export const DEFAULT_RPC = 'wss://polkadot.api.onfinality.io/public-ws';
 // export const DEFAULT_RPC = 'wss://kusama-rpc.dwellir.com';
 // export const DEFAULT_RPC = 'wss://karura.polkawallet.io';
-export const DEFAULT_RPC = 'wss://shiden.api.onfinality.io/public-ws';
+// export const DEFAULT_RPC = 'wss://shiden.api.onfinality.io/public-ws';
 interface InputsProps {
   updateApi: any,
   isSwitchingRpc: boolean,
@@ -25,6 +25,7 @@ interface InputsProps {
   fetchData: FetchData,
   rpcErr: string | null,
   fetchErr: string | null,
+  resetData: () => void,
 }
 
 type eventHandler = (e: ChangeEvent<HTMLInputElement>) => void;
@@ -37,6 +38,7 @@ const Inputs: FC<InputsProps> = ({
   fetchData,
   rpcErr,
   fetchErr,
+  resetData,
 }) => {
   const [query, setQuery] = useState<string | null>(null);
   const [argsLength, setArgsLength] = useState<number>(0);
@@ -68,6 +70,8 @@ const Inputs: FC<InputsProps> = ({
     setArg2Name(arg2Name);
     setQuery(queryName);
     setArgsLength(parseInt(argsLenght, 10));
+
+    resetData();
   };
 
   const menu: ReactElement = (
@@ -194,4 +198,4 @@ const Inputs: FC<InputsProps> = ({
   );
 };
 
-export default Inputs;
+export default React.memo(Inputs);
