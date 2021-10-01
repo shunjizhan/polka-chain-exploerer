@@ -4,16 +4,17 @@ import React, {
   useRef,
   ChangeEvent,
   FC,
-  SetStateAction,
-  Dispatch,
+  useCallback,
 } from 'react';
 import { ApiPromise } from '@polkadot/api';
+import { AnyJson, Codec } from '@polkadot/types/types';
 
 import { StorageKey } from '@polkadot/types';
 import { PaginationOptions } from '@polkadot/api/types';
 import Inputs, { DEFAULT_RPC } from './Inputs';
 import Loading from './Loading';
 
+import DataViewer from './DataViewer';
 import {
   createRpc,
   getModules,
@@ -22,8 +23,6 @@ import {
 
 import '../styles.scss';
 import 'antd/dist/antd.css';
-import { AnyFunction, AnyJson, Codec } from '@polkadot/types/types';
-import DataViewer from './DataViewer';
 
 interface ApiRef {
   api: ApiPromise | null,
@@ -36,6 +35,8 @@ const Scanner: FC = () => {
   /* ---------- data ---------- */
   const [data, setData] = useState<AnyJson | null>(null);
   const [nextPageArgs, setNextPageArgs] = useState<any[] | null>(null);
+  const [pageCache, setPageCache] = useState<any[]>([]);
+  const [pageArgsCache, setPageArgsCache] = useState<any[]>([]);
   const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC });
 
   /* ---------- error ---------- */
@@ -46,7 +47,7 @@ const Scanner: FC = () => {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isSwitchingRpc, setIsSwitchingRpc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isLoadingNextPage, setIsLoadingNextPage] = useState<boolean>(false);
+  const [isLoadingPage, setisLoadingPage] = useState<boolean>(false);
 
   /* ----- initialization ----- */
   useEffect(() => {
@@ -61,6 +62,7 @@ const Scanner: FC = () => {
   const resetData = () => {
     setData(null);
     setNextPageArgs(null);
+    setPageCache([]);
     setRpcErr(null);
     setFetchErr(null);
   };
@@ -85,7 +87,7 @@ const Scanner: FC = () => {
   const PAGE_SIZE = 10;
   const fetchData: FetchData = async (query, arg1, arg2, argsLength, lastKey = null) => {
     if (lastKey) {
-      setIsLoadingNextPage(true);
+      setisLoadingPage(true);
     } else {
       setData(null);
     }
@@ -114,6 +116,7 @@ const Scanner: FC = () => {
 
       let res: AnyJson;
       if (queryFn.entriesPaged && !hasArg) {
+        // prepare options and fetch data
         const opt: PaginationOptions = {
           pageSize: PAGE_SIZE,
           args: [],
@@ -121,20 +124,16 @@ const Scanner: FC = () => {
         if (lastKey)  { opt.startKey = lastKey; }
 
         const entries: [StorageKey, Codec][] = await queryFn.entriesPaged(opt);
-        const keys: StorageKey[] = await queryFn.keysPaged(opt);
+        res = entries.map(([key, val]) => [key.toHuman(), val.toHuman()]);
 
-        console.log('paginated entries: ', entries, keys);
-
+        // save arguments for next page
         const hasNextPage = (entries.length === PAGE_SIZE);
         if (hasNextPage) {
-          const lastKey: StorageKey = keys.at(-1)!;
-          console.log(lastKey.toString(), entries.length);
-          setNextPageArgs([query, arg1, arg2, argsLength, lastKey]);
+          const keys: StorageKey[] = await queryFn.keysPaged(opt);
+          const nextKey: StorageKey = keys.at(-1)!;
+          setNextPageArgs([query, arg1, arg2, argsLength, nextKey]);
         }
-
-        res = entries.map(([key, val]) => [key.toString(), val.toHuman()]);
       } else {
-        console.log('query args ', args);
         res = (await queryFn(...args)).toHuman();
       }
 
@@ -148,16 +147,32 @@ const Scanner: FC = () => {
       setFetchErr((e as ChangeEvent<any>).toString());
     } finally {
       setIsLoading(false);
-      setIsLoadingNextPage(false);
+      setisLoadingPage(false);
     }
   };
 
   const fetchNextPage = async (): Promise<void> => {
     if (!nextPageArgs) return;
 
+    setPageCache([...pageCache, data]);
+    setPageArgsCache([...pageArgsCache, nextPageArgs]);
+
     // @ts-ignore
     await fetchData(...nextPageArgs);
   };
+
+  const fetchPrevPage = () => {
+    const prevPage = pageCache.pop();
+    const prevArgs = pageArgsCache.pop();
+
+    setData(prevPage);
+    setNextPageArgs(prevArgs);
+
+    setPageCache([...pageCache]);
+    setPageArgsCache([...pageArgsCache]);
+  };
+
+  console.log(pageCache);
 
   return (
     <div id='Scanner'>
@@ -169,7 +184,7 @@ const Scanner: FC = () => {
             updateApi={ updateApi }
             isSwitchingRpc={ isSwitchingRpc }
             isLoading={ isLoading }
-            modules={ getModules(curApi.current.api!) }
+            modules={ getModules(curApi.current.api!) }   // TODO: memo modules
             fetchData={ fetchData }
             fetchErr={ fetchErr }
             rpcErr={ rpcErr }
@@ -181,8 +196,10 @@ const Scanner: FC = () => {
               <DataViewer
                 src={ data as Record<string, unknown> }
                 fetchNextPage={ fetchNextPage }
-                isLoadingNextPage={ isLoadingNextPage }
+                fetchPrevPage={ fetchPrevPage }
+                isLoadingPage={ isLoadingPage }
                 hasNextPage={ !!nextPageArgs }
+                hasPrevPage={ !!pageCache.length }
               />
             )
           }

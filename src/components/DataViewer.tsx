@@ -1,7 +1,12 @@
-import React, { Dispatch, FC, MouseEventHandler, SetStateAction, useState } from 'react';
+import React, {
+  Dispatch, FC, MouseEventHandler, SetStateAction, useState,
+} from 'react';
 import ReactJson from 'react-json-view';
 import { Button } from 'antd';
-import { EyeInvisibleTwoTone, EyeTwoTone, ArrowRightOutlined } from '@ant-design/icons';
+import {
+  EyeInvisibleTwoTone, EyeTwoTone, ArrowRightOutlined, ArrowLeftOutlined,
+} from '@ant-design/icons';
+
 interface OptionButtonProps {
   handler: Dispatch<SetStateAction<boolean>>,
   enabled: boolean,
@@ -10,22 +15,28 @@ interface OptionButtonProps {
 
 const OptionButton: FC<OptionButtonProps> = React.memo(({ handler, enabled, text }) => (
   <Button className='data-option' onClick={ () => handler(x => !x) }>
-    { text } {
+    { text }
+    {' '}
+    {
       enabled
-        ? <EyeTwoTone twoToneColor="#52c41a" />
-        : <EyeInvisibleTwoTone twoToneColor="red" />
-      }
+        ? <EyeTwoTone twoToneColor='#52c41a' />
+        : <EyeInvisibleTwoTone twoToneColor='red' />
+    }
   </Button>
 ));
 
 interface DataViewerProps {
   src: Record<string, unknown>,
-  isLoadingNextPage: boolean,
+  isLoadingPage: boolean,
   hasNextPage: boolean,
+  hasPrevPage: boolean,
   fetchNextPage: () => void,
+  fetchPrevPage: () => void,
 }
 
-const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage, isLoadingNextPage, hasNextPage }) => {
+const DataViewer: FC<DataViewerProps> = ({
+  src, fetchNextPage, fetchPrevPage, isLoadingPage, hasNextPage, hasPrevPage,
+}) => {
   const [enableClipboard, setEnableClipboard] = useState<boolean>(false);
   const [displayDataTypes, setDisplayDataTypes] = useState<boolean>(false);
   const [displayObjectSize, setDisplayObjectSize] = useState<boolean>(false);
@@ -62,13 +73,29 @@ const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage, isLoadingNextPage
           type='primary'
           id='next-page-button'
           className='data-option'
-          onClick={ fetchNextPage }
-          loading={ isLoadingNextPage }
-          disabled={ isLoadingNextPage || !hasNextPage }
+          onClick={ fetchPrevPage }
+          loading={ isLoadingPage }
+          disabled={ isLoadingPage || !hasPrevPage }
         >
-          Next Page <ArrowRightOutlined />
+          <ArrowLeftOutlined />
+          Prev Page
+
+        </Button>
+
+        <Button
+          type='primary'
+          id='next-page-button'
+          className='data-option'
+          onClick={ fetchNextPage }
+          loading={ isLoadingPage }
+          disabled={ isLoadingPage || !hasNextPage }
+        >
+          Next Page
+          {' '}
+          <ArrowRightOutlined />
         </Button>
       </div>
+
       <div id='result-data'>
         <ReactJson
           src={ src }

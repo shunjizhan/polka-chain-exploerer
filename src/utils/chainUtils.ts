@@ -31,6 +31,7 @@ export const getQueryFn = (api: ApiPromise, query: string): any => {
 
 const sortByName = (a, b): number => a.name.localeCompare(b.name);
 export const getModules = (api: ApiPromise): any => {
+  // @ts-ignore
   const { modules } = api.runtimeMetadata.toJSON().metadata!.v13;
   console.log('modules:', modules);
 
