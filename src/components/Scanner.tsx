@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import { ApiPromise } from '@polkadot/api';
 
-import EventTable, { TableData } from './EventTable';
 import Progress from './Progress';
 import Inputs, { DEFAULT_RPC } from './Inputs';
 import Loading from './Loading';
@@ -22,7 +21,8 @@ import {
 
 import '../styles.scss';
 import 'antd/dist/antd.css';
-import { AnyFunction, Codec } from '@polkadot/types/types';
+import { AnyFunction, AnyJson, Codec } from '@polkadot/types/types';
+import DataViewer from './DataViewer';
 
 interface ApiRef {
   api: ApiPromise | null,
@@ -32,6 +32,8 @@ interface ApiRef {
 export type FetchData = (query: string, arg1: string | null, arg2: string | null, argsLength: number) => void;
 
 const Scanner: FC = () => {
+  /* ---------- data ---------- */
+  const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [rpcErr, setRpcErr] = useState<string | null>(null);
   const [fetchErr, setFetchErr] = useState<string | null>(null);
   const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC });
@@ -47,6 +49,14 @@ const Scanner: FC = () => {
       const api = await createRpc(DEFAULT_RPC);
       curApi.current = { api, rpc: DEFAULT_RPC };
       setIsInitializing(false);
+
+      const _res = await api.query.identity.identityOf.entriesPaged({
+        args: [],
+        pageSize: 10,
+      });
+      const res = _res.map(([key, val]) => [key.toString(), val.toHuman()]);
+      console.log(res);
+      setData(res);
     })();
   }, []);
 
@@ -60,7 +70,7 @@ const Scanner: FC = () => {
       curApi.current = { api, rpc };
       setRpcErr(null);
     } catch (e) {
-      console.log('!!!!!!!!!!!!', e)
+      console.log('!!!!!!!!!!!!', e);
       setRpcErr(`failed to connect to new RPC: ${rpc}`);
     } finally {
       setIsSwitchingRpc(false);
@@ -114,6 +124,14 @@ const Scanner: FC = () => {
               all={ 100 }
             />
           </div> */}
+
+          {
+            data && (
+              <DataViewer
+                src={ data }
+              />
+            )
+          }
         </>
       )}
     </div>

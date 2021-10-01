@@ -165,6 +165,7 @@ const Inputs: FC<InputsProps> = ({
           onChange={ handleArg1Change }
           placeholder='leave empty will use default arg'
           addonBefore={ arg1Name }
+          style={{ textAlign: 'center' }}
         />
       }
       { argsLength > 1 && 
@@ -173,6 +174,7 @@ const Inputs: FC<InputsProps> = ({
           onChange={ handleArg2Change }
           placeholder='leave empty will use default arg'
           addonBefore={ arg2Name }
+          style={{ textAlign: 'center' }}
         />
       }
       { query && 
