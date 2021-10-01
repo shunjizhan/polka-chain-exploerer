@@ -38,8 +38,6 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
 
   await api.isReady;
   // const res = await api.query.balances.account();
-
-
     
   console.log('connected!!');
 

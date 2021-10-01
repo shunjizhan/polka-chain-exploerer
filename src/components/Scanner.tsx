@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { ApiPromise } from '@polkadot/api';
 
+import { StorageKey } from '@polkadot/types';
 import Progress from './Progress';
 import Inputs, { DEFAULT_RPC } from './Inputs';
 import Loading from './Loading';
@@ -33,7 +34,7 @@ export type FetchData = (query: string, arg1: string | null, arg2: string | null
 
 const Scanner: FC = () => {
   /* ---------- data ---------- */
-  const [data, setData] = useState<Record<string, unknown> | null>(null);
+  const [data, setData] = useState<AnyJson | null>(null);
   const [rpcErr, setRpcErr] = useState<string | null>(null);
   const [fetchErr, setFetchErr] = useState<string | null>(null);
   const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC });
@@ -49,14 +50,6 @@ const Scanner: FC = () => {
       const api = await createRpc(DEFAULT_RPC);
       curApi.current = { api, rpc: DEFAULT_RPC };
       setIsInitializing(false);
-
-      const _res = await api.query.identity.identityOf.entriesPaged({
-        args: [],
-        pageSize: 10,
-      });
-      const res = _res.map(([key, val]) => [key.toString(), val.toHuman()]);
-      console.log(res);
-      setData(res);
     })();
   }, []);
 
@@ -80,6 +73,7 @@ const Scanner: FC = () => {
   const fetchData: FetchData = async (query, arg1, arg2, argsLength) => {
     setIsLoading(true);
     setFetchErr(null);
+    setData(null);
 
     const queryFn: AnyFunction = getQueryFn(curApi.current.api as ApiPromise, query);
 
@@ -88,13 +82,38 @@ const Scanner: FC = () => {
         console.warn(`query method ${query} is not found...`); return;
       }
 
-      console.log(query, arg1, arg2);
-      let args: any[] = [];
-      if (argsLength === 1) args = [arg1];
-      if (argsLength === 2) args = [arg2];
+      const hasArg = arg1 || arg2;
 
-      const res: Codec = await queryFn.apply(null, args);    /* ts-disable-line */
-      console.log(res.toHuman());
+      console.log(query, arg1, arg2);
+      let args: any[] | string = [];
+      if (argsLength === 1 && arg1) {
+        args = [arg1];
+      }
+      if (argsLength === 2 && hasArg) {
+        args = [arg1, arg2];
+      }
+
+      let res: AnyJson;
+      if (queryFn.entriesPaged && !hasArg) {
+        console.log('entriesPaged args ', args);
+        const entries: [StorageKey, Codec][] = await queryFn.entriesPaged({
+          args,
+          pageSize: 10,
+        });
+
+        res = entries.map(([key, val]) => [key.toString(), val.toHuman()]);
+      } else {
+        console.log('query args ', args);
+        res = (await queryFn(...args)).toHuman();
+      }
+
+      console.log(res);
+      res = res !== null
+        ? res instanceof Object ? res : [res]
+        : ['NO DATA'];
+
+      
+      setData(res);
     } catch (e) {
       setFetchErr((e as ChangeEvent<any>).toString());
     } finally {
