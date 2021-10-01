@@ -10,7 +10,6 @@ import React, {
 import { ApiPromise } from '@polkadot/api';
 
 import { StorageKey } from '@polkadot/types';
-import Progress from './Progress';
 import Inputs, { DEFAULT_RPC } from './Inputs';
 import Loading from './Loading';
 
@@ -101,7 +100,7 @@ const Scanner: FC = () => {
         const PAGE_SIZE = 10;
         const allEntries: [StorageKey, Codec][] = [];
         let curIndex = -1;
-        const _fetch = async (opt: PaginationOptions): [StorageKey, Codec][] => {
+        const _fetch = async (opt: PaginationOptions): Promise<[StorageKey, Codec][]> => {
           const entries: [StorageKey, Codec][] = await queryFn.entriesPaged(opt);
           allEntries.push(...entries);
 
@@ -155,13 +154,6 @@ const Scanner: FC = () => {
             fetchErr={ fetchErr }
             rpcErr={ rpcErr }
           />
-
-          {/* <div id='toolBox'>
-            <Progress
-              cur={ 100 }
-              all={ 100 }
-            />
-          </div> */}
 
           {
             data && (

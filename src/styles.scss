@@ -49,28 +49,6 @@ $polkaPurple: rgb(230, 0, 122);
   color: red;
 }
 
-/* ----- progress ----- */
-#progress {
-  min-width: 588px;
-}
-
-#progress-count {
-  display: flex;
-  margin: 5px 0;
-  svg {
-    height: 100%;
-  }
-}
-
-#toolBox {
-  display: flex;
-  margin-bottom: 10px;
-  width: 80%;
-  height: 50px;
-  justify-content: center;
-  align-items: center;
-}
-
 /* ----- ant design overwrite ----- */
 .ant-row {
   margin-bottom: 0px !important;
@@ -96,7 +74,7 @@ $polkaPurple: rgb(230, 0, 122);
 
 #result-options {
   display: flex;
-  margin: 20px 0;
+  margin: 30px 0 20px 0;
   flex-direction: row;
   flex-shrink: 1;
 }

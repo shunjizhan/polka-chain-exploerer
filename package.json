@@ -76,7 +76,6 @@
     "antd": "^4.16.13",
     "buffer": "^6.0.3",
     "crypto": "^1.0.1",
-    "rc-progress": "^3.1.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-json-view": "^1.21.3",

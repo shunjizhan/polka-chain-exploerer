@@ -185,7 +185,7 @@ const Inputs: FC<InputsProps> = ({
           loading={ isLoading }
           disabled={ disableInputs }
         >
-          Fetch State Data
+          Fetch Data
         </Button>
       }
       { fetchErr && <div className='err-msg'>{ fetchErr }</div>}

@@ -65,7 +65,8 @@ const DataViewer: FC<DataViewerProps> = ({ src, fetchNextPage }) => {
           enableClipboard={ enableClipboard }
           displayDataTypes={ displayDataTypes }
           displayObjectSize={ displayObjectSize }
-          displayArrayKey={ displayArrayKey	 }
+          // @ts-ignore
+          displayArrayKey={ displayArrayKey }
           collapseStringsAfterLength={ 68 }
           name={ null }
           indentWidth={ 4 }
