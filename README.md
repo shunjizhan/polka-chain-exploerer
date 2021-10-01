@@ -1,13 +1,13 @@
-# Polkadot Scanner
-A polkadot scanner to display block events.
+# Polkadot Chain Explorer
+A polkadot chain explorer to query chain storage data
 
-[Production App](polkadot-scanner-nine.vercel.app)
+[Production App](ppolka-chain-exploerer.vercel.app)
 
 ## Features
-- fetch and display events for a range of block
-- use custom RPC endpoint
-- sort and filter on table columns
-
+- **Custom RPC**: connect to any custom RPC endpoint, which will fetch metadata and parse it to get all available storage queries 
+- **Quick Query Selection**: a dropdown with submenu to quickly select storage queries, and display input boxes based on it's arguments
+- **Powerful Data Viewer**: fetch and display result data in a nice viewer, with variable options to display result in the best manner
+- **Paginated Supported**: for large queries, fetch paginated results, and use prev/next page button to navigate.
 ## Commands
 - install dependencies: `yarn`
 - run dev server: `yarn start`
