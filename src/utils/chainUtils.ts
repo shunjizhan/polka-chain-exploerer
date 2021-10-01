@@ -32,7 +32,7 @@ const firstCharToLower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export const getQueryFn = (api: ApiPromise, query: string): any => {
   const [prefix, name] = query.split('.');
 
-  return api.query[firstCharToLower(prefix)][firstCharToLower(name)];
+  return api.query[firstCharToLower(prefix)]?.[firstCharToLower(name)];
 }
 
 const sortByName = (a, b): number => a.name.localeCompare(b.name);

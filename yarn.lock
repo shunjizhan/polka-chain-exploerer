@@ -1603,7 +1603,7 @@
     eventemitter3 "^4.0.7"
     rxjs "^7.3.0"
 
-"@polkadot/apps-config@^0.96.2-36":
+"@polkadot/apps-config@0.96.2-36":
   version "0.96.2-36"
   resolved "https://registry.yarnpkg.com/@polkadot/apps-config/-/apps-config-0.96.2-36.tgz#74bde96692a0ecf36127d76d375447cc885b3b06"
   integrity sha512-Z8OIio8so5g03VGoeJ0PATIVj4oMnWeLkLA6TVH7qHb7TGAS6hPQeGtseQDFrPLWElMgvab4HyWHNjYKvlQjgg==

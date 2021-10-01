@@ -12,10 +12,11 @@ const { SubMenu } = Menu;
 
 const SUCCESS = 'success';
 const ERROR = 'error';
-export const DEFAULT_RPC = 'wss://rpc.polkadot.io';
-// const DEFAULT_RPC = 'wss://polkadot.api.onfinality.io/public-ws';
-// const DEFAULT_RPC = 'wss://kusama-rpc.dwellir.com';
-// const DEFAULT_RPC = 'wss://karura.polkawallet.io';
+// export const DEFAULT_RPC = 'wss://rpc.polkadot.io';
+// export const DEFAULT_RPC = 'wss://polkadot.api.onfinality.io/public-ws';
+// export const DEFAULT_RPC = 'wss://kusama-rpc.dwellir.com';
+// export const DEFAULT_RPC = 'wss://karura.polkawallet.io';
+export const DEFAULT_RPC = 'wss://shiden.api.onfinality.io/public-ws';
 interface InputsProps {
   updateApi: any,
   isSwitchingRpc: boolean,

@@ -1,4 +1,4 @@
-$input-width: 368px;
+$input-width: 388px;
 
 $orange: orange;
 $polkaPurple: rgb(230, 0, 122);
@@ -66,10 +66,13 @@ $polkaPurple: rgb(230, 0, 122);
 
 /* ----- data viewer ----- */
 #data-viewer-container {
-  // border: 2px solid $polkaPurple;
   margin-bottom: 20px;
   width: 100%;
-  padding: 0 15%;
+  padding: 0 15% 20px 15%;
+  height: 100vh !important;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1;
 }
 
 #result-options {

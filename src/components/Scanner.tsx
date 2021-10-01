@@ -76,12 +76,13 @@ const Scanner: FC = () => {
     setData(null);
 
     const queryFn: any = getQueryFn(curApi.current.api as ApiPromise, query);
+    if (!queryFn) {
+      setFetchErr(`query method ${query} is not supported yet...`);
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      if (!queryFn) {
-        console.warn(`query method ${query} is not found...`); return;
-      }
-
       const hasArg = arg1 || arg2;
 
       console.log(query, arg1, arg2);
@@ -136,7 +137,7 @@ const Scanner: FC = () => {
   };
 
   const fetchNextPage = (): void => {
-    alert('this feature is WIP... please come back soon');
+    alert('this feature is coming soon...');
   };
 
   return (
