@@ -75,7 +75,7 @@ const Scanner: FC = () => {
     setFetchErr(null);
     setData(null);
 
-    const queryFn: AnyFunction = getQueryFn(curApi.current.api as ApiPromise, query);
+    const queryFn: any = getQueryFn(curApi.current.api as ApiPromise, query);
 
     try {
       if (!queryFn) {
@@ -147,7 +147,7 @@ const Scanner: FC = () => {
           {
             data && (
               <DataViewer
-                src={ data }
+                src={ data as Record<string, unknown> }
               />
             )
           }
