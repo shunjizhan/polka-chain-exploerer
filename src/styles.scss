@@ -3,6 +3,7 @@ $input-width: 368px;
 $orange: orange;
 $polkaPurple: rgb(230, 0, 122);
 
+/* ----- app ----- */
 #Scanner {
   display: flex;
   align-items: center;
@@ -11,6 +12,18 @@ $polkaPurple: rgb(230, 0, 122);
   margin-top: 20px;
 }
 
+/* ----- initial loading screen ----- */
+#loading-overlay__text {
+  font-size: 300%;
+  margin: 100px 0 50px 0;
+}
+
+#loadingText {
+  padding-left: 10px;
+  color: $polkaPurple;
+}
+
+/* ----- inputs ----- */
 #input-container {
   display: flex;
   flex-direction: column;
@@ -19,7 +32,6 @@ $polkaPurple: rgb(230, 0, 122);
 
 #rpc-button, #fetch-button {
   border-radius: 2px;
-  margin-bottom: 20px;
   background-color: rgba($polkaPurple, 0.95);
   border: none;
 
@@ -29,19 +41,15 @@ $polkaPurple: rgb(230, 0, 122);
   }
 }
 
-#loading-overlay__text {
-  font-size: 300%;
-  margin: 100px 0 50px 0;
+.query-selector {
+  margin-top: 30px;
 }
 
-#table-container {
-  width: 80%;
+.err-msg {
+  color: red;
 }
 
-#data-table {
-  width: 100%;
-}
-
+/* ----- progress ----- */
 #progress {
   min-width: 588px;
 }
@@ -63,16 +71,7 @@ $polkaPurple: rgb(230, 0, 122);
   align-items: center;
 }
 
-#filter {
-  border: 1px solid yellow;
-  margin-left: 50px;
-}
-
-#loadingText {
-  padding-left: 10px;
-  color: $polkaPurple;
-}
-
+/* ----- ant design overwrite ----- */
 .ant-row {
   margin-bottom: 0px !important;
 }
@@ -87,5 +86,5 @@ $polkaPurple: rgb(230, 0, 122);
   margin-right: 6px;
 }
 
-/* github badge */
+/* ----- github badge ----- */
 @at-root.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}

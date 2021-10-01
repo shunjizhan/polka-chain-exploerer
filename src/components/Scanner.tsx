@@ -22,6 +22,7 @@ import {
 
 import '../styles.scss';
 import 'antd/dist/antd.css';
+import { AnyFunction, Codec } from '@polkadot/types/types';
 
 interface ApiRef {
   api: ApiPromise | null,
@@ -51,7 +52,7 @@ const Scanner: FC = () => {
 
   const updateApi = async (rpc: string) => {
     if (rpc === curApi.current.rpc) return;
-    // console.log('!!!!', rpc, curApi.current.rpc)
+    console.log('switch:', curApi.current.rpc, '=>', rpc);
 
     setIsSwitchingRpc(true);
     try {
@@ -59,8 +60,8 @@ const Scanner: FC = () => {
       curApi.current = { api, rpc };
       setRpcErr(null);
     } catch (e) {
-      console.log('!!!!!!!!!!!!')
-      setRpcErr(`failed to connect to new RPC: rpc`);
+      console.log('!!!!!!!!!!!!', e)
+      setRpcErr(`failed to connect to new RPC: ${rpc}`);
     } finally {
       setIsSwitchingRpc(false);
     }
@@ -70,17 +71,20 @@ const Scanner: FC = () => {
     setIsLoading(true);
     setFetchErr(null);
 
-    const queryFn: any = getQueryFn(curApi.current.api as ApiPromise, query);
-    
-    console.log(query, arg1, arg2);
-    let args: any[] = [];
-    if (argsLength === 1) args = [arg1];
-    if (argsLength === 2) args = [arg2];
+    const queryFn: AnyFunction = getQueryFn(curApi.current.api as ApiPromise, query);
 
-    let res;
     try {
-      res = await queryFn.apply(null, args);    /* ts-disable-line */
-      console.log(res);
+      if (!queryFn) {
+        console.warn(`query method ${query} is not found...`); return;
+      }
+
+      console.log(query, arg1, arg2);
+      let args: any[] = [];
+      if (argsLength === 1) args = [arg1];
+      if (argsLength === 2) args = [arg2];
+
+      const res: Codec = await queryFn.apply(null, args);    /* ts-disable-line */
+      console.log(res.toHuman());
     } catch (e) {
       setFetchErr((e as ChangeEvent<any>).toString());
     } finally {

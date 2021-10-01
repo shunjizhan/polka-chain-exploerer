@@ -148,7 +148,12 @@ const Inputs: FC<InputsProps> = ({
         Switch RPC
       </Button>
 
-      <Dropdown overlay={ menu } disabled={ disableInputs }>
+      <Dropdown
+        overlay={ menu }
+        disabled={ disableInputs }
+        trigger={['click']}
+        className='query-selector'
+      >
         <Button>
           { query || 'Select State Query' } <DownOutlined />
         </Button>
@@ -181,7 +186,7 @@ const Inputs: FC<InputsProps> = ({
           Fetch State Data
         </Button>
       }
-      { fetchErr && <div>{ fetchErr }</div>}
+      { fetchErr && <div className='err-msg'>{ fetchErr }</div>}
     </section>
   );
 };

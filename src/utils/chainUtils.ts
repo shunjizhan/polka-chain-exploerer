@@ -1,6 +1,4 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { SignedBlock } from '@polkadot/types/interfaces';
-import { TableData } from '../components/EventTable';
 import { typesBundle, typesChain } from '@polkadot/apps-config';
 import { Metadata } from '@polkadot/types';
 import { TypeRegistry } from '@polkadot/types/create';
@@ -39,16 +37,20 @@ export const createRpc = async (rpc: string): Promise<ApiPromise> => {
   }
 
   await api.isReady;
+  // const res = await api.query.balances.account();
     
   console.log('connected!!');
 
   return api;
 };
 
+
+const firstCharToLower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+
 export const getQueryFn = (api: ApiPromise, query: string): any => {
   const [prefix, name] = query.split('.');
 
-  return api.query[prefix.toLocaleLowerCase()][name.toLocaleLowerCase()];
+  return api.query[firstCharToLower(prefix)][firstCharToLower(name)];
 }
 
 const sortByName = (a, b): number => a.name.localeCompare(b.name);
@@ -66,46 +68,3 @@ export const getModules = (api: ApiPromise): any => {
 
   return sortedModules.sort(sortByName);;
 };  
-
-
-
-
-
-
-
-
-export const getSignedBlock = async (api: ApiPromise, blockNumber: number): Promise<SignedBlock> => {
-  const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
-  const signedBlock = await api.rpc.chain.getBlock(blockHash);
-
-  return signedBlock;
-};
-
-export const getEventsForBlock = async (api: ApiPromise, blockNumber: number): Promise<TableData[]> => {
-  const signedBlock = await getSignedBlock(api, blockNumber);
-  const allRecords = await api.query.system.events.at(signedBlock.block.header.hash);
-
-  const res: TableData[] = [];
-  signedBlock.block.extrinsics.forEach(({ method: { method, section } }, index) => {
-    const events = allRecords
-      .filter(({ phase }) => (
-        phase.isApplyExtrinsic
-        && phase.asApplyExtrinsic.eq(index)))
-      .map(({ event }) => `${event.section}.${event.method}`);
-
-    res.push({
-      block: blockNumber,
-      section,
-      method,
-      events,
-    });
-  });
-
-  return res;
-};
-
-export const getLastBlock = async (api: ApiPromise): Promise<number> => {
-  const lastHeader = await api.rpc.chain.getHeader();
-
-  return lastHeader.number.toNumber();
-};
