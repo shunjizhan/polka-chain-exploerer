@@ -89,7 +89,7 @@ $polkaPurple: rgb(230, 0, 122);
   overflow: scroll;
 }
 
-#page-options {
+#pagination-options {
   margin-left: auto;
   margin-right: 0;
   display: flex;
@@ -99,7 +99,7 @@ $polkaPurple: rgb(230, 0, 122);
 .data-option {
   border-radius: 5px !important;
 
-  &:not(:last-of-type) {
+  &:not(:last-child) {
     margin-right: 10px !important;
   }
 }
@@ -110,7 +110,6 @@ $polkaPurple: rgb(230, 0, 122);
   justify-content: center;
   border: 1px solid #1890ff;
   padding: 0 5px;
-  margin-right: 10px;
   min-width: 68px;
 }
 

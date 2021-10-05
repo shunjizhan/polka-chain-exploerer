@@ -31,11 +31,17 @@ interface ApiRef {
 
 export type FetchData = (query: string, arg1: string | null, arg2: string | null, argsLength: number) => void;
 
+const DEFAULT_PAGE_SIZE = 10;
+
 const Scanner: FC = () => {
   /* ---------- data ---------- */
   const [data, setData] = useState<AnyJson | null>(null);
-  const [nextPageArgs, setNextPageArgs] = useState<any[] | null>(null);
   const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC, modules: [] });
+
+  /* ---------- pagination data ---------- */
+  const [nextPageArgs, setNextPageArgs] = useState<any[] | null>(null);
+  const [curArgs, setCurArgs] = useState<any[] | null>(null);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   /* ---------- error ---------- */
   const [rpcErr, setRpcErr] = useState<string | null>(null);
@@ -94,7 +100,6 @@ const Scanner: FC = () => {
     }
   };
 
-  const PAGE_SIZE = 10;
   const fetchData: FetchData = async (query, arg1, arg2, argsLength, lastKey = null) => {
     if (lastKey) {
       setIsLoadingPage(true);
@@ -129,16 +134,25 @@ const Scanner: FC = () => {
       if (queryFn.entriesPaged && !hasArg) {
         // prepare options and fetch data
         const opt: PaginationOptions = {
-          pageSize: PAGE_SIZE,
+          pageSize,
           args: [],
         };
         if (lastKey)  { opt.startKey = lastKey; }
 
-        const entries: [StorageKey, Codec][] = await queryFn.entriesPaged(opt);
+        let entries: [StorageKey, Codec][];
+
+        if (pageSize > 1000) {
+          entries = await queryFn.entries();
+        } else {
+          entries = await queryFn.entriesPaged(opt);
+        }
         res = entries.map(([key, val]) => [key.toHuman(), val.toHuman()]);
 
+        // save arguments for page size change
+        setCurArgs([query, arg1, arg2, argsLength]);
+
         // save arguments for next page
-        const hasNextPageArgs = (entries.length === PAGE_SIZE);
+        const hasNextPageArgs = (entries.length === pageSize);
         if (hasNextPageArgs) {
           const keys: StorageKey[] = await queryFn.keysPaged(opt);
           const nextKey: StorageKey = keys[keys.length - 1]!;
@@ -181,6 +195,16 @@ const Scanner: FC = () => {
     }
   };
 
+  const handlePageSizeChange = (size: number) => {
+    resetData();
+    setPageSize(size);
+  };
+
+  useEffect(() => {
+    // @ts-ignore
+    !isInitializing && fetchData(...curArgs);
+  }, [pageSize]);
+
   return (
     <div id='Scanner'>
       { isInitializing && <Loading rpc={ DEFAULT_RPC } /> }
@@ -208,6 +232,8 @@ const Scanner: FC = () => {
                 hasNextPage={ hasNextPage || !!nextPageArgs }
                 hasPrevPage={ hasPrevPage }
                 curPage={ curPage }
+                pageSize={ pageSize }
+                handlePageSizeChange={ handlePageSizeChange }
               />
             )
           }

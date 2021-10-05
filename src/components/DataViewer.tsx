@@ -2,9 +2,11 @@ import React, {
   Dispatch, FC, MouseEventHandler, SetStateAction, useState,
 } from 'react';
 import ReactJson from 'react-json-view';
-import { Button } from 'antd';
 import {
-  EyeInvisibleTwoTone, EyeTwoTone, ArrowRightOutlined, ArrowLeftOutlined,
+  Button, Dropdown, Menu,
+} from 'antd';
+import {
+  EyeInvisibleTwoTone, EyeTwoTone, ArrowRightOutlined, ArrowLeftOutlined, DownOutlined,
 } from '@ant-design/icons';
 
 interface OptionButtonProps {
@@ -33,15 +35,30 @@ interface DataViewerProps {
   fetchNextPage: () => void,
   fetchPrevPage: () => void,
   curPage: number,
+  pageSize: number,
+  handlePageSizeChange: (size: number) => void,
 }
 
 const DataViewer: FC<DataViewerProps> = ({
-  src, fetchNextPage, fetchPrevPage, isLoadingPage, hasNextPage, hasPrevPage, curPage,
+  src, fetchNextPage, fetchPrevPage, isLoadingPage, hasNextPage, hasPrevPage, curPage, pageSize, handlePageSizeChange,
 }) => {
   const [enableClipboard, setEnableClipboard] = useState<boolean>(false);
   const [displayDataTypes, setDisplayDataTypes] = useState<boolean>(false);
   const [displayObjectSize, setDisplayObjectSize] = useState<boolean>(false);
   const [displayArrayKey, setDisplayArrayKey] = useState<boolean>(false);
+
+  const handlePageSizeSelect = ({ key }) => handlePageSizeChange(parseInt(key, 10));
+
+  const PAGE_SIZE_OPTIONS = ['1', '5', '10', '20', '50', '100', '500', '1000', '99999'];
+  const pageSizeMenu: React.ReactElement = (
+    <Menu onClick={ handlePageSizeSelect }>
+      { PAGE_SIZE_OPTIONS.map(p => (
+        <Menu.Item key={ p }>
+          { p }
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   return (
     <div id='data-viewer-container'>
@@ -70,7 +87,19 @@ const DataViewer: FC<DataViewerProps> = ({
           text='array key'
         />
 
-        <div id='page-options'>
+        <div id='pagination-options'>
+          <Dropdown
+            overlay={ pageSizeMenu }
+            disabled={ isLoadingPage }
+            trigger={ ['click'] }
+            className='page-size-selector'
+          >
+            <Button className='data-option page-button'>
+              {`Page Size ${pageSize}`}
+              {' '}
+              <DownOutlined />
+            </Button>
+          </Dropdown>
           <Button
             type='primary'
             className='data-option page-button'
