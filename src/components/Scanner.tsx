@@ -7,18 +7,18 @@ import React, {
 } from 'react';
 import { ApiPromise } from '@polkadot/api';
 import { AnyJson, Codec } from '@polkadot/types/types';
-
 import { StorageKey } from '@polkadot/types';
 import { PaginationOptions } from '@polkadot/api/types';
+
 import Inputs, { DEFAULT_RPC } from './Inputs';
 import Loading from './Loading';
-
 import DataViewer from './DataViewer';
 import {
   createRpc,
   getModules,
   getQueryFn,
 } from '../utils/chainUtils';
+import usePaginatedCache from '../utils/usePaginatedCache';
 
 import '../styles.scss';
 import 'antd/dist/antd.css';
@@ -26,6 +26,7 @@ import 'antd/dist/antd.css';
 interface ApiRef {
   api: ApiPromise | null,
   rpc: string,
+  modules: any[],
 }
 
 export type FetchData = (query: string, arg1: string | null, arg2: string | null, argsLength: number) => void;
@@ -34,9 +35,7 @@ const Scanner: FC = () => {
   /* ---------- data ---------- */
   const [data, setData] = useState<AnyJson | null>(null);
   const [nextPageArgs, setNextPageArgs] = useState<any[] | null>(null);
-  const [pageCache, setPageCache] = useState<any[]>([]);
-  const [pageArgsCache, setPageArgsCache] = useState<any[]>([]);
-  const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC });
+  const curApi = useRef<ApiRef>({ api: null, rpc: DEFAULT_RPC, modules: [] });
 
   /* ---------- error ---------- */
   const [rpcErr, setRpcErr] = useState<string | null>(null);
@@ -46,13 +45,24 @@ const Scanner: FC = () => {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isSwitchingRpc, setIsSwitchingRpc] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isLoadingPage, setisLoadingPage] = useState<boolean>(false);
+  const [isLoadingPage, setIsLoadingPage] = useState<boolean>(false);
+
+  const {
+    getNextPage,
+    getPrevPage,
+    addPage,
+    resetCache,
+    curPage,
+    hasNextPage,
+    hasPrevPage,
+  } = usePaginatedCache();
 
   /* ----- initialization ----- */
   useEffect(() => {
     (async () => {
       const api = await createRpc(DEFAULT_RPC);
-      curApi.current = { api, rpc: DEFAULT_RPC };
+      const modules = getModules(api);
+      curApi.current = { api, modules, rpc: DEFAULT_RPC };
       setIsInitializing(false);
     })();
   }, []);
@@ -61,7 +71,7 @@ const Scanner: FC = () => {
   const resetData = () => {
     setData(null);
     setNextPageArgs(null);
-    setPageCache([]);
+    resetCache();
     setRpcErr(null);
     setFetchErr(null);
   };
@@ -73,7 +83,8 @@ const Scanner: FC = () => {
     setIsSwitchingRpc(true);
     try {
       const api = await createRpc(rpc);
-      curApi.current = { api, rpc };
+      const modules = getModules(api);
+      curApi.current = { api, rpc, modules };
       resetData();
     } catch (e) {
       console.log('!!!!!!!!!!!!', e);
@@ -86,9 +97,10 @@ const Scanner: FC = () => {
   const PAGE_SIZE = 10;
   const fetchData: FetchData = async (query, arg1, arg2, argsLength, lastKey = null) => {
     if (lastKey) {
-      setisLoadingPage(true);
+      setIsLoadingPage(true);
     } else {
       setData(null);
+      resetCache();
     }
     setIsLoading(true);
     setFetchErr(null);
@@ -126,10 +138,10 @@ const Scanner: FC = () => {
         res = entries.map(([key, val]) => [key.toHuman(), val.toHuman()]);
 
         // save arguments for next page
-        const hasNextPage = (entries.length === PAGE_SIZE);
-        if (hasNextPage) {
+        const hasNextPageArgs = (entries.length === PAGE_SIZE);
+        if (hasNextPageArgs) {
           const keys: StorageKey[] = await queryFn.keysPaged(opt);
-          const nextKey: StorageKey = keys.at(-1)!;
+          const nextKey: StorageKey = keys[keys.length - 1]!;
           setNextPageArgs([query, arg1, arg2, argsLength, nextKey]);
         }
       } else {
@@ -142,36 +154,32 @@ const Scanner: FC = () => {
         : ['NO DATA'];
 
       setData(res);
+      addPage(res);
     } catch (e) {
       setFetchErr((e as ChangeEvent<any>).toString());
     } finally {
       setIsLoading(false);
-      setisLoadingPage(false);
+      setIsLoadingPage(false);
     }
   };
 
-  const fetchNextPage = async (): Promise<void> => {
-    if (!nextPageArgs) return;
-
-    setPageCache([...pageCache, data]);
-    setPageArgsCache([...pageArgsCache, nextPageArgs]);
+  const fetchNextPage = (): void => {
+    if (hasNextPage) {
+      const cachedPage: AnyJson = getNextPage();
+      setData(cachedPage);
+      return;
+    }
 
     // @ts-ignore
-    await fetchData(...nextPageArgs);
+    nextPageArgs && fetchData(...nextPageArgs);
   };
 
-  const fetchPrevPage = () => {
-    const prevPage = pageCache.pop();
-    const prevArgs = pageArgsCache.pop();
-
-    setData(prevPage);
-    setNextPageArgs(prevArgs);
-
-    setPageCache([...pageCache]);
-    setPageArgsCache([...pageArgsCache]);
+  const fetchPrevPage = (): void => {
+    if (hasPrevPage) {
+      const cachedPage: AnyJson = getPrevPage();
+      setData(cachedPage);
+    }
   };
-
-  console.log(pageCache);
 
   return (
     <div id='Scanner'>
@@ -183,7 +191,7 @@ const Scanner: FC = () => {
             updateApi={ updateApi }
             isSwitchingRpc={ isSwitchingRpc }
             isLoading={ isLoading }
-            modules={ getModules(curApi.current.api!) }   // TODO: memo modules
+            modules={ curApi.current.modules }
             fetchData={ fetchData }
             fetchErr={ fetchErr }
             rpcErr={ rpcErr }
@@ -194,11 +202,12 @@ const Scanner: FC = () => {
             data && (
               <DataViewer
                 src={ data as Record<string, unknown> }
+                isLoadingPage={ isLoadingPage }
                 fetchNextPage={ fetchNextPage }
                 fetchPrevPage={ fetchPrevPage }
-                isLoadingPage={ isLoadingPage }
-                hasNextPage={ !!nextPageArgs }
-                hasPrevPage={ !!pageCache.length }
+                hasNextPage={ hasNextPage || !!nextPageArgs }
+                hasPrevPage={ hasPrevPage }
+                curPage={ curPage }
               />
             )
           }

@@ -32,10 +32,11 @@ interface DataViewerProps {
   hasPrevPage: boolean,
   fetchNextPage: () => void,
   fetchPrevPage: () => void,
+  curPage: number,
 }
 
 const DataViewer: FC<DataViewerProps> = ({
-  src, fetchNextPage, fetchPrevPage, isLoadingPage, hasNextPage, hasPrevPage,
+  src, fetchNextPage, fetchPrevPage, isLoadingPage, hasNextPage, hasPrevPage, curPage,
 }) => {
   const [enableClipboard, setEnableClipboard] = useState<boolean>(false);
   const [displayDataTypes, setDisplayDataTypes] = useState<boolean>(false);
@@ -69,31 +70,36 @@ const DataViewer: FC<DataViewerProps> = ({
           text='array key'
         />
 
-        <Button
-          type='primary'
-          id='next-page-button'
-          className='data-option'
-          onClick={ fetchPrevPage }
-          loading={ isLoadingPage }
-          disabled={ isLoadingPage || !hasPrevPage }
-        >
-          <ArrowLeftOutlined />
-          Prev Page
+        <div id='page-options'>
+          <Button
+            type='primary'
+            className='data-option page-button'
+            onClick={ fetchPrevPage }
+            loading={ isLoadingPage }
+            disabled={ isLoadingPage || !hasPrevPage }
+          >
+            <ArrowLeftOutlined />
+            Prev
+          </Button>
 
-        </Button>
+          <div
+            id='page-number'
+            className='data-option page-button'
+          >
+            {`Page ${curPage + 1}`}
+          </div>
 
-        <Button
-          type='primary'
-          id='next-page-button'
-          className='data-option'
-          onClick={ fetchNextPage }
-          loading={ isLoadingPage }
-          disabled={ isLoadingPage || !hasNextPage }
-        >
-          Next Page
-          {' '}
-          <ArrowRightOutlined />
-        </Button>
+          <Button
+            type='primary'
+            className='data-option page-button'
+            onClick={ fetchNextPage }
+            loading={ isLoadingPage }
+            disabled={ isLoadingPage || !hasNextPage }
+          >
+            Next
+            <ArrowRightOutlined />
+          </Button>
+        </div>
       </div>
 
       <div id='result-data'>
