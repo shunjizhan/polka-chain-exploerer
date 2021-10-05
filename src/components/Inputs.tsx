@@ -1,12 +1,18 @@
-import React, { FC, ReactElement, useState, SetStateAction, ChangeEvent } from 'react';
-import { Input, Button, Form, Menu, Dropdown } from 'antd';
-import { SyncOutlined, WifiOutlined, DisconnectOutlined, DownOutlined } from '@ant-design/icons';
+import React, {
+  FC, ReactElement, useState, SetStateAction, ChangeEvent,
+} from 'react';
+import {
+  Input, Button, Form, Menu, Dropdown,
+} from 'antd';
+import {
+  SyncOutlined, WifiOutlined, DisconnectOutlined, DownOutlined,
+} from '@ant-design/icons';
 import { FetchData } from './Scanner';
 import {
   getQueryDetails,
   getArgsLength,
+  getArgNames,
 } from '../utils/inputsUtils';
-import { getArgNames } from '../utils/inputsUtils';
 
 const { SubMenu } = Menu;
 
@@ -48,7 +54,7 @@ const Inputs: FC<InputsProps> = ({
   const [arg2Name, setArg2Name] = useState<string>('');
   const [rpcInput, setRpcInput] = useState<string>(DEFAULT_RPC);
 
-  const handleRpcInput: eventHandler = (e) => {
+  const handleRpcInput: eventHandler = e => {
     setRpcInput(e.target.value);
   };
 
@@ -60,7 +66,7 @@ const Inputs: FC<InputsProps> = ({
   const handleQuerySelect = ({ key }) => {
     const [queryName, argsLenght, argNames] = key.split('---');
     const [arg1Name, arg2Name] = argNames.split(',');
-    
+
     // reset inputs
     setArg1('');
     setArg2('');
@@ -92,12 +98,12 @@ const Inputs: FC<InputsProps> = ({
                       key={ `${name}.${item.name}---${getArgsLength(item)}---${getArgNames(item)}` }
                     >
                       { `${queryDetails}` }
-                    </Menu.Item>                  
-                  )
+                    </Menu.Item>
+                  );
                 })
-              } 
+              }
             </SubMenu>
-          )
+          );
         })
       }
     </Menu>
@@ -131,7 +137,7 @@ const Inputs: FC<InputsProps> = ({
   );
 
   const handleFetch = () => {
-    fetchData(query as string, arg1, arg2, argsLength);
+    fetchData(query as string, arg1, arg2, argsLength, null, false);
   };
 
   const handleArg1Change = e => setArg1(e.target.value);
@@ -156,43 +162,48 @@ const Inputs: FC<InputsProps> = ({
       <Dropdown
         overlay={ menu }
         disabled={ disableInputs }
-        trigger={['click']}
+        trigger={ ['click'] }
         className='query-selector'
       >
         <Button>
-          { query || 'Select State Query' } <DownOutlined />
+          { query || 'Select State Query' }
+          {' '}
+          <DownOutlined />
         </Button>
       </Dropdown>
 
-      { argsLength > 0 && 
-        <Input
-          value={ arg1 }
-          onChange={ handleArg1Change }
-          placeholder='leave empty will use default arg'
-          addonBefore={ arg1Name }
-          style={{ textAlign: 'center' }}
-        />
-      }
-      { argsLength > 1 && 
-        <Input
-          value={ arg2 }
-          onChange={ handleArg2Change }
-          placeholder='leave empty will use default arg'
-          addonBefore={ arg2Name }
-          style={{ textAlign: 'center' }}
-        />
-      }
-      { query && 
-        <Button
-          type='primary'
-          id='fetch-button'
-          onClick={ handleFetch }
-          loading={ isLoading }
-          disabled={ disableInputs }
-        >
-          Fetch Data
-        </Button>
-      }
+      { argsLength > 0
+        && (
+          <Input
+            value={ arg1 }
+            onChange={ handleArg1Change }
+            placeholder='leave empty will use default arg'
+            addonBefore={ arg1Name }
+            style={{ textAlign: 'center' }}
+          />
+        )}
+      { argsLength > 1
+        && (
+          <Input
+            value={ arg2 }
+            onChange={ handleArg2Change }
+            placeholder='leave empty will use default arg'
+            addonBefore={ arg2Name }
+            style={{ textAlign: 'center' }}
+          />
+        )}
+      { query
+        && (
+          <Button
+            type='primary'
+            id='fetch-button'
+            onClick={ handleFetch }
+            loading={ isLoading }
+            disabled={ disableInputs }
+          >
+            Fetch Data
+          </Button>
+        )}
       { fetchErr && <div className='err-msg'>{ fetchErr }</div>}
     </section>
   );

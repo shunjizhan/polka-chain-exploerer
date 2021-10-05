@@ -29,7 +29,14 @@ interface ApiRef {
   modules: any[],
 }
 
-export type FetchData = (query: string, arg1: string | null, arg2: string | null, argsLength: number) => void;
+export type FetchData = (
+  query: string,
+  arg1: string | null,
+  arg2: string | null,
+  argsLength: number,
+  lastKey: string | null,
+  isPaginatedFetch: boolean
+) => void;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -100,8 +107,8 @@ const Scanner: FC = () => {
     }
   };
 
-  const fetchData: FetchData = async (query, arg1, arg2, argsLength, lastKey = null) => {
-    if (lastKey) {
+  const fetchData: FetchData = async (query, arg1, arg2, argsLength, lastKey = null, isPaginatedFetch = true) => {
+    if (isPaginatedFetch) {
       setIsLoadingPage(true);
     } else {
       setData(null);
@@ -149,7 +156,7 @@ const Scanner: FC = () => {
         res = entries.map(([key, val]) => [key.toHuman(), val.toHuman()]);
 
         // save arguments for page size change
-        setCurArgs([query, arg1, arg2, argsLength]);
+        setCurArgs([query, arg1, arg2, argsLength, null]);
 
         // save arguments for next page
         const hasNextPageArgs = (entries.length === pageSize);
@@ -168,7 +175,7 @@ const Scanner: FC = () => {
         : ['NO DATA'];
 
       setData(res);
-      addPage(res);
+      (isPaginatedFetch || curPage === -1) && addPage(res);
     } catch (e) {
       setFetchErr((e as ChangeEvent<any>).toString());
     } finally {
