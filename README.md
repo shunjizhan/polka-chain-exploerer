@@ -7,7 +7,7 @@ A polkadot chain explorer to query chain storage data
 - **Custom RPC**: connect to any custom RPC endpoint, which will fetch metadata and parse it to get all available storage queries 
 - **Quick Query Selection**: a dropdown with submenu to quickly select storage queries, and display input boxes based on it's arguments
 - **Powerful Data Viewer**: fetch and display result data in a nice viewer, with variable options to display result in the best manner
-- **Paginated Supported**: for large queries, fetch paginated results, and use prev/next page button to navigate.
+- **Paginated Supported**: for large queries, fetch paginated results, and use prev/next page button to navigate with cache.
 ## Commands
 - install dependencies: `yarn`
 - run dev server: `yarn start`
